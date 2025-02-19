@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dnevnik</string>
+    <string name="loading_failed">Неудалось загрузить</string>
+    <string name="retry">Попробовать снова</string>
+    <string name="loading">Загрузка</string>
+    <string name="schedule">Расписание</string>
+    <string name="homework">Домашнее задание</string>
+    <string name="back_button">Назад</string>
+    <string name="lesson">Урок</string>
+    <string name="marks">Оценки</string>
+</resources>

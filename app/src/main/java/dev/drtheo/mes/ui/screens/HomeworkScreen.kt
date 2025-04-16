@@ -80,7 +80,7 @@ fun HomeworkList(
     ) {
         items(homework) { item ->
             HomeworkCard(
-                item.name(), item.homework!!,
+                item.subjectName, item.homework!!,
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
@@ -108,10 +108,8 @@ fun HomeworkCard(title: String, homework: EventHomework, modifier: Modifier = Mo
             fontSize = 20.sp
         )
 
-        val desc: String = homework.descriptions.formatHomework()
-
         Text(
-            text = desc,
+            text = homework.descriptions.formatHomework(),
             modifier = Modifier.padding(start = 16.dp, bottom = 4.dp, end = 4.dp),
             overflow = TextOverflow.Ellipsis,
             lineHeight = 16.sp

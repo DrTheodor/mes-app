@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 data class EventHomework(
     @SerialName("descriptions")
     val descriptions: List<String>,
-    @SerialName("entries")
-    val entries: List<Entry>?,
+//    @SerialName("entries")
+//    val entries: List<Entry>?,
     @SerialName("execute_count")
     val executeCount: Int?,
 //    @SerialName("link_types")
@@ -17,19 +17,20 @@ data class EventHomework(
     val materials: Materials?,
     //@SerialName("presence_status_id")
     //val presenceStatusId: Long,
-    //@SerialName("total_count")
-    //val totalCount: Int
+    @SerialName("total_count")
+    val totalCount: Int
 ) {
-    fun isEmpty(): Boolean = descriptions.isEmpty() && entries == null && executeCount == null && materials == null
+    fun isEmpty(): Boolean = totalCount == 0
 }
 
 fun createDummyHomework(descriptions: List<String>): EventHomework {
     return EventHomework(
         descriptions = descriptions,
-        entries = null,
+//        entries = null,
         executeCount = null,
 //        linkTypes = null,
         materials = null,
+        totalCount = descriptions.size
     )
 }
 

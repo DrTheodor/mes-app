@@ -15,8 +15,8 @@ data class Children(
     val classUnitId: Long,
     @SerialName("contingent_guid")
     val contingentGuid: String,
-    @SerialName("contract_id")
-    val contractId: Long,
+//    @SerialName("contract_id")
+//    val contractId: Long,
 //    @SerialName("email")
 //    val email: Any?,
 //    @SerialName("enrollment_date")
@@ -47,8 +47,8 @@ data class Children(
     val sex: String,
 //    @SerialName("snils")
 //    val snils: String,
-    @SerialName("sudir_account_exists")
-    val sudirAccountExists: Boolean,
+//    @SerialName("sudir_account_exists")
+//    val sudirAccountExists: Boolean,
 //    @SerialName("sudir_login")
 //    val sudirLogin: Any?,
 //    @SerialName("type")

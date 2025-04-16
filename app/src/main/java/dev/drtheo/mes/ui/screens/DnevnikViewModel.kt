@@ -19,9 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 sealed interface AuthUiState {
     data object Authenticated : AuthUiState
@@ -65,7 +63,7 @@ class DnevnikViewModel(
     var marksUiState: MarksUiState by mutableStateOf(MarksUiState.Loading)
         private set
 
-    private val date: Date = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse("2025-02-14")!!
+    private val date: Date = Date() //SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse("2025-02-14")!!
 
     var selectedEvent: Event? by mutableStateOf(null)
         private set
@@ -119,22 +117,26 @@ class DnevnikViewModel(
                         throw IllegalArgumentException("Profile can't be null!")
                 }
 
-                val events = dnevnikRepository.getEvents(profile!!, date, expandFields = "homework,marks")
+                println("Profile: $profile")
 
-                events.response.forEach {
+                val allEvents = dnevnikRepository.getEvents(profile!!, date, expandFields = "homework,marks")
+
+                allEvents.response.forEach {
                     println(it)
                 }
 
-                scheduleUiState = ScheduleUiState.Success(events.response)
+                scheduleUiState = ScheduleUiState.Success(
+                    allEvents.response
+                )
 
                 homeworkUiState = HomeworkUiState.Success(
-                    events.response.filter {
+                    allEvents.response.filter {
                         it.homework != null && !it.homework.isEmpty()
                     }
                 )
 
                 marksUiState = MarksUiState.Success(
-                    events.response.filter {
+                    allEvents.response.filter {
                         !it.marks.isNullOrEmpty()
                     }
                 )

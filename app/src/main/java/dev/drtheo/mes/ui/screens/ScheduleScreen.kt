@@ -1,9 +1,11 @@
 package dev.drtheo.mes.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -101,6 +104,8 @@ fun ScheduleList(
     }
 }
 
+const val NO_HOMEWORK = "Не задано."
+
 @Composable
 fun EventCard(event: Event, onClickLesson: (Event) -> Unit, modifier: Modifier = Modifier) {
     Card(
@@ -109,28 +114,41 @@ fun EventCard(event: Event, onClickLesson: (Event) -> Unit, modifier: Modifier =
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         modifier = modifier
-            .height(100.dp),
+            .defaultMinSize(minHeight = 100.dp),
         onClick = { onClickLesson(event) }
     ) {
-        Text(
-            text = event.name(),
-            modifier = Modifier
-                .padding(start = 8.dp, top = 4.dp),
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
-
-        val desc: String? = event.homework?.descriptions?.formatHomework()
-
-        if (desc != null) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            Arrangement.SpaceBetween
+        ) {
             Text(
-                text = desc,
-                modifier = Modifier.padding(start = 16.dp, bottom = 4.dp, end = 4.dp),
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 16.sp
+                text = event.subjectName,
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 4.dp),
+                textAlign = TextAlign.Left,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+
+            Text(
+                text = event.room(),
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 4.dp),
+                textAlign = TextAlign.Right,
+                fontSize = 16.sp
             )
         }
+
+        val hasHomework = event.homework != null && !event.homework.isEmpty()
+        val desc: String = if (hasHomework) event.homework!!.descriptions.formatHomework() else NO_HOMEWORK
+
+        Text(
+            text = desc,
+            fontStyle = if (hasHomework) FontStyle.Normal else FontStyle.Italic,
+            modifier = Modifier.padding(start = 16.dp, bottom = 4.dp, end = 4.dp),
+            overflow = TextOverflow.Ellipsis,
+            lineHeight = 16.sp
+        )
     }
 }
 
@@ -144,7 +162,6 @@ fun ScheduleListPreview() {
                 finishAt = "2025-02-14",
                 source = "whatever",
                 startAt = "2025-02-14",
-                title = "Subject No.$it",
                 homework = createDummyHomework(
                     arrayListOf("Homework 1", "Homework 2")
                 )

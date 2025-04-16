@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -85,11 +86,13 @@ fun MarkList(
     ) {
         items(events) { item ->
             item.marks!!.forEach {
-                Mark(item.name(), it)
+                Mark(item.subjectName, it)
             }
         }
     }
 }
+
+const val NO_COMMENT = "Нет комментария."
 
 @Composable
 fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
@@ -98,7 +101,7 @@ fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = modifier
-                .size(32.dp) // Set the size of the box
+                .size(48.dp) // Set the size of the box
                 .padding(4.dp), // Add padding around the box
             contentAlignment = Alignment.Center // Center the content inside the box
         ) {
@@ -117,7 +120,7 @@ fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
                 Text(
                     text = mark.value,
                     style = TextStyle(
-                        fontSize = 15.sp, // Set the text size
+                        fontSize = 20.sp, // Set the text size
                         fontWeight = FontWeight.Bold // Set the text weight
                     )
                 )
@@ -126,7 +129,7 @@ fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
                     Text(
                         text = mark.weight.toString(),
                         style = TextStyle(
-                            fontSize = 6.sp, // Smaller font size for the exponent
+                            fontSize = 16.sp, // Smaller font size for the exponent
                             fontWeight = FontWeight.Bold // Set the text weight
                         ),
                         modifier = Modifier
@@ -140,16 +143,18 @@ fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
             Text(
                 text = title,
                 style = TextStyle(
-                    fontSize = 15.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
 
-            if (mark.comment != null) {
-                Text(
-                    text = mark.comment
-                )
-            }
+            val hasComment = mark.comment != null
+            val comment = if (hasComment) mark.comment!! else NO_COMMENT
+
+            Text(
+                text = comment,
+                fontStyle = if (hasComment) FontStyle.Italic else FontStyle.Normal
+            )
         }
     }
 }

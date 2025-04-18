@@ -13,34 +13,16 @@ data class LessonSchedule(
     val beginUtc: Int,
     @SerialName("building_name")
     val buildingName: String,
-//    @SerialName("comment")
-//    val comment: Any?,
-//    @SerialName("control")
-//    val control: Any?,
-//    @SerialName("course_lesson_type")
-//    val courseLessonType: Any?,
-//    @SerialName("created_date_time")
-//    val createdDateTime: Any?,
     @SerialName("date")
     val date: String,
     @SerialName("details")
     val details: Details,
-//    @SerialName("disease_status_type")
-//    val diseaseStatusType: Any?,
     @SerialName("end_time")
     val endTime: String,
     @SerialName("end_utc")
     val endUtc: Int,
-//    @SerialName("esz_field_id")
-//    val eszFieldId: Any?,
-//    @SerialName("evaluation")
-//    val evaluation: Any?,
-//    @SerialName("field_name")
-//    val fieldName: Any?,
     @SerialName("homework_presence_status_id")
     val homeworkPresenceStatusId: Int,
-//    @SerialName("homework_to_give")
-//    val homeworkToGive: Any?,
     @SerialName("id")
     val id: Int,
     @SerialName("is_missed_lesson")
@@ -57,8 +39,6 @@ data class LessonSchedule(
     val marks: List<Mark>,
     @SerialName("plan_id")
     val planId: Long,
-//    @SerialName("remote_lesson")
-//    val remoteLesson: Any?,
     @SerialName("room_name")
     val roomName: String,
     @SerialName("room_number")

@@ -8,8 +8,6 @@ import kotlinx.serialization.Serializable
 data class LessonHomework(
     @SerialName("additional_materials")
     val additionalMaterials: List<AdditionalMaterial>,
-//    @SerialName("attachments")
-//    val attachments: List<Any>,
     @SerialName("date_assigned_on")
     val dateAssignedOn: String,
     @SerialName("date_prepared_for")
@@ -30,6 +28,4 @@ data class LessonHomework(
     val isDone: Boolean,
     @SerialName("materials")
     val materials: List<Material>,
-//    @SerialName("written_answer")
-//    val writtenAnswer: Any?
 )

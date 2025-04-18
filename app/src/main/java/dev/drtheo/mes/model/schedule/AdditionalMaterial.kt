@@ -10,8 +10,6 @@ data class AdditionalMaterial(
     val actionId: Int,
     @SerialName("action_name")
     val actionName: String,
-//    @SerialName("content_type")
-//    val contentType: Any?,
     @SerialName("description")
     val description: String?,
     @SerialName("id")

@@ -5,8 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Events(
-    //@SerialName("errors")
-    //val errors: Any?,
     @SerialName("response")
     val response: List<Event>,
     @SerialName("total_count")

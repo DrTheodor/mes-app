@@ -24,7 +24,6 @@ interface DnevnikApiService {
 
     @GET("api/family/mobile/v1/lesson_schedule_items/{lesson_id}")
     suspend fun lessonSchedule(
-        //@Header("auth-token") accessToken: String,
         @Path("lesson_id") lessonId: Long,
         @Query("student_id") studentId: Long,
         @Header("X-Mes-Subsystem") mesSubsystem: String = "familymp"
@@ -32,12 +31,9 @@ interface DnevnikApiService {
 
     @GET("api/family/mobile/v1/profile")
     suspend fun getProfile(
-        //@Header("auth-token") accessToken: String,
         @Header("X-Mes-Subsystem") mesSubsystem: String = "familymp"
     ): Profile
 
     @GET("v2/token/refresh")
-    suspend fun refreshToken(
-        //@Header("Authorization") bearerToken: String
-    ): String
+    suspend fun refreshToken(): String
 }

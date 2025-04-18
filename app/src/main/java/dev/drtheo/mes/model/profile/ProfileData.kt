@@ -7,10 +7,6 @@ import kotlinx.serialization.Serializable
 data class ProfileData(
     @SerialName("birth_date")
     val birthDate: String,
-//    @SerialName("contract_id")
-//    val contractId: Any?,
-//    @SerialName("email")
-//    val email: Any?,
     @SerialName("first_name")
     val firstName: String,
     @SerialName("id")

@@ -3,7 +3,6 @@ package dev.drtheo.mes.ui.screens
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,18 +25,17 @@ import androidx.compose.ui.unit.sp
 import dev.drtheo.mes.ErrorScreen
 import dev.drtheo.mes.LoadingScreen
 import dev.drtheo.mes.formatHomework
-import dev.drtheo.mes.model.event.Event
-import dev.drtheo.mes.model.event.EventHomework
+import dev.drtheo.mes.model.wrapped.Homework
+import dev.drtheo.mes.ui.DnevnikViewModel
+import dev.drtheo.mes.ui.HomeworkUiState
 
 @Composable
 fun BuildHomeworkScreen(
     dnevnikViewModel: DnevnikViewModel,
-    contentPadding: PaddingValues
 ) {
     HomeworkScreen(
         homeworkUiState = dnevnikViewModel.homeworkUiState,
         retryAction = dnevnikViewModel::refreshData,
-        contentPadding = contentPadding
     )
 }
 
@@ -47,20 +45,18 @@ fun HomeworkScreen(
     homeworkUiState: HomeworkUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val isRefreshing by remember { mutableStateOf(false) }
 
     PullToRefreshBox(
         modifier = modifier,
         isRefreshing = isRefreshing,
-        onRefresh = retryAction
+        onRefresh = retryAction,
     ) {
         when (homeworkUiState) {
             is HomeworkUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
             is HomeworkUiState.Success -> HomeworkList(
                 homeworkUiState.homework,
-                contentPadding = contentPadding,
                 modifier = modifier.fillMaxWidth()
             )
             is HomeworkUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
@@ -70,7 +66,7 @@ fun HomeworkScreen(
 
 @Composable
 fun HomeworkList(
-    homework: List<Event>,
+    homework: List<Homework>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -80,7 +76,7 @@ fun HomeworkList(
     ) {
         items(homework) { item ->
             HomeworkCard(
-                item.subjectName, item.homework!!,
+                item.subjectName, item,
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
@@ -90,24 +86,23 @@ fun HomeworkList(
 }
 
 @Composable
-fun HomeworkCard(title: String, homework: EventHomework, modifier: Modifier = Modifier) {
+fun HomeworkCard(title: String, homework: Homework, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        modifier = Modifier
+            .padding(start = 8.dp, top = 8.dp),
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
+    )
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         modifier = modifier
-            .height(100.dp)
     ) {
-        Text(
-            text = title,
-            modifier = Modifier
-                .padding(start = 8.dp, top = 4.dp),
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
-
         Text(
             text = homework.descriptions.formatHomework(),
             modifier = Modifier.padding(start = 16.dp, bottom = 4.dp, end = 4.dp),

@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.drtheo.mes.ui.screens.AuthUiState
-import dev.drtheo.mes.ui.screens.DnevnikViewModel
+import dev.drtheo.mes.ui.AuthUiState
+import dev.drtheo.mes.ui.DnevnikViewModel
 import dev.drtheo.mes.ui.theme.DnevnikTheme
 
 class MainActivity : ComponentActivity() {

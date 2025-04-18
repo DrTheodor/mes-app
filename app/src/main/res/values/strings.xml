@@ -8,4 +8,9 @@
     <string name="back_button">Back</string>
     <string name="lesson">Lesson</string>
     <string name="marks">Marks</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_homework">No tasks.</string>
+    <string name="no_comment">No comment.</string>
+    <string name="no_marks">No marks.</string>
 </resources>

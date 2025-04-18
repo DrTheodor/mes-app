@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Dnevnik</string>
+    <string name="app_name">Дневник МЭШ</string>
     <string name="loading_failed">Неудалось загрузить</string>
     <string name="retry">Попробовать снова</string>
     <string name="loading">Загрузка</string>
@@ -9,4 +9,9 @@
     <string name="back_button">Назад</string>
     <string name="lesson">Урок</string>
     <string name="marks">Оценки</string>
+    <string name="ok">Подтвердить</string>
+    <string name="cancel">Отмена</string>
+    <string name="no_homework">Не задано.</string>
+    <string name="no_comment">Нет комментария.</string>
+    <string name="no_marks">Нет оценок.</string>
 </resources>

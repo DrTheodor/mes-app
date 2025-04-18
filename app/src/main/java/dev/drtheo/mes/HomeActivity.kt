@@ -1,10 +1,9 @@
 package dev.drtheo.mes
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,55 +11,43 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.drtheo.mes.model.event.Event
+import dev.drtheo.mes.ui.DnevnikViewModel
+import dev.drtheo.mes.ui.compose.BottomNavBar
+import dev.drtheo.mes.ui.compose.DnevnikTopAppBar
 import dev.drtheo.mes.ui.screens.BuildHomeworkScreen
 import dev.drtheo.mes.ui.screens.BuildLessonScreen
 import dev.drtheo.mes.ui.screens.BuildMarksScreen
 import dev.drtheo.mes.ui.screens.BuildScheduleScreen
-import dev.drtheo.mes.ui.screens.DnevnikViewModel
 import dev.drtheo.mes.ui.theme.DnevnikTheme
 import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class DnevnikScreen {
     abstract val route: String
+    abstract val hasCalendar: Boolean
 
     fun init() {
         Lookup[route] = this
@@ -75,6 +62,7 @@ sealed class DnevnikScreen {
 
 abstract class BuiltInDnevnikScreen(
     override val route: String,
+    override val hasCalendar: Boolean = true,
     val titleRes: Int,
 
     val selectedIcon: ImageVector? = null,
@@ -118,7 +106,9 @@ object Screens {
 
     object Lesson : CustomDnevnikScreen(
         route = "lesson", title = ""
-    )
+    ) {
+        override val hasCalendar: Boolean = false
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -139,164 +129,58 @@ fun HomeActivity(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { DnevnikTopAppBar(
+            viewModel = dnevnikViewModel,
             currentScreen = currentScreen,
             scrollBehavior = scrollBehavior,
             canNavigateBack = navController.previousBackStackEntry != null && currentScreen !is BuiltInDnevnikScreen,
             navigateUp = { navController.navigateUp() }
         ) },
         bottomBar = { BottomNavBar(navController) }
-    ) {
+    ) { innerPadding ->
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .padding(innerPadding),
         ) {
-            val padding = it
-
-            NavHost(navController = navController, startDestination = startScreen.route) {
+            NavHost(
+                navController = navController,
+                startDestination = startScreen.route,
+                enterTransition = {
+                    fadeIn(animationSpec = tween(250))
+                },
+                exitTransition = {
+                    fadeOut(animationSpec = tween(250))
+                },
+                popEnterTransition = {
+                    fadeIn(animationSpec = tween(250))
+                },
+                popExitTransition = {
+                    fadeOut(animationSpec = tween(250))
+                }
+            ) {
                 composable(Screens.Schedule.route) {
                     BuildScheduleScreen(
                         dnevnikViewModel,
                         onClickLesson = {
                             dnevnikViewModel.selectedEvent(it)
                             navController.navigate(Screens.Lesson.route)
-                        },
-                        padding
+                        }
                     )
                 }
 
                 composable(Screens.Homework.route) {
-                    BuildHomeworkScreen(dnevnikViewModel, padding)
+                    BuildHomeworkScreen(dnevnikViewModel)
                 }
 
                 composable(Screens.Marks.route) {
-                    BuildMarksScreen(dnevnikViewModel, padding)
+                    BuildMarksScreen(dnevnikViewModel)
                 }
 
                 composable(Screens.Lesson.route) {
                     val event: Event = dnevnikViewModel.selectedEvent!!
-                    BuildLessonScreen(event, padding)
+                    BuildLessonScreen(event)
                 }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DnevnikTopAppBar(
-    currentScreen: DnevnikScreen,
-    scrollBehavior: TopAppBarScrollBehavior,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val title = when (currentScreen) {
-        is BuiltInDnevnikScreen -> stringResource(currentScreen.titleRes)
-        is CustomDnevnikScreen -> currentScreen.title
-    }
-
-    CenterAlignedTopAppBar(
-        scrollBehavior = scrollBehavior,
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-            )
-        },
-        navigationIcon = {
-            if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back_button)
-                    )
-                }
-            }
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
-fun BottomNavBar(navController: NavController) {
-    var selectedTabIndex by rememberSaveable {
-        mutableIntStateOf(0)
-    }
-
-    NavigationBar {
-        // looping over each tab to generate the views and navigation for each item
-        DnevnikScreen.Entries.forEachIndexed { index, tabBarItem ->
-            if (tabBarItem !is BuiltInDnevnikScreen)
-                return@forEachIndexed
-
-            val title = stringResource(tabBarItem.titleRes)
-
-            NavigationBarItem(
-                selected = selectedTabIndex == index,
-                onClick = {
-                    selectedTabIndex = index
-                    navController.navigate(tabBarItem.route)
-                },
-                icon = {
-                    if (tabBarItem.selectedIcon != null && tabBarItem.unselectedIcon != null) {
-                        TabBarDirectIconView(
-                            isSelected = selectedTabIndex == index,
-                            selectedIcon = tabBarItem.selectedIcon,
-                            unselectedIcon = tabBarItem.unselectedIcon,
-                            title = title,
-                        )
-                    } else if (tabBarItem.selectedPainter != null && tabBarItem.unselectedPainter != null) {
-                        TabBarPainterIconView(
-                            isSelected = selectedTabIndex == index,
-                            selectedPainter = painterResource(tabBarItem.selectedPainter),
-                            unselectedPainter = painterResource(tabBarItem.unselectedPainter),
-                            title = title,
-                        )
-                    }
-                },
-                label = { Text(title) })
-        }
-    }
-}
-
-@Composable
-fun TabBarDirectIconView(
-    isSelected: Boolean,
-    selectedIcon: ImageVector,
-    unselectedIcon: ImageVector,
-    title: String,
-    badgeAmount: Int? = null
-) {
-    BadgedBox(badge = { TabBarBadgeView(badgeAmount) }) {
-        Icon(
-            imageVector = if (isSelected) {selectedIcon} else {unselectedIcon},
-            contentDescription = title
-        )
-    }
-}
-
-@Composable
-fun TabBarPainterIconView(
-    isSelected: Boolean,
-    selectedPainter: Painter,
-    unselectedPainter: Painter,
-    title: String,
-    badgeAmount: Int? = null
-) {
-    BadgedBox(badge = { TabBarBadgeView(badgeAmount) }) {
-        Icon(
-            painter = if (isSelected) {selectedPainter} else {unselectedPainter},
-            contentDescription = title
-        )
-    }
-}
-
-@Composable
-fun TabBarBadgeView(count: Int? = null) {
-    if (count == null)
-        return
-
-    Badge {
-        Text(count.toString())
     }
 }
 
@@ -306,7 +190,7 @@ fun TabBarBadgeView(count: Int? = null) {
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Image(
-        modifier = modifier.size(100.dp),
+        modifier = modifier.size(64.dp),
         painter = painterResource(R.drawable.ic_loading_outline),
         contentDescription = stringResource(R.string.loading)
     )

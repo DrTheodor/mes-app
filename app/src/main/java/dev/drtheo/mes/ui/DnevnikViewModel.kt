@@ -1,4 +1,4 @@
-package dev.drtheo.mes.ui.screens
+package dev.drtheo.mes.ui
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -13,13 +13,19 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.drtheo.mes.MainApplication
 import dev.drtheo.mes.data.AuthRepository
 import dev.drtheo.mes.data.DnevnikRepository
+import dev.drtheo.mes.formatToMes
 import dev.drtheo.mes.model.event.Event
 import dev.drtheo.mes.model.profile.Profile
+import dev.drtheo.mes.model.wrapped.DnevnikData
+import dev.drtheo.mes.model.wrapped.Homework
+import dev.drtheo.mes.model.wrapped.HomeworkData
+import dev.drtheo.mes.model.wrapped.MarkData
+import dev.drtheo.mes.same
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-import java.util.Date
+import java.util.Calendar
 
 sealed interface AuthUiState {
     data object Authenticated : AuthUiState
@@ -33,13 +39,13 @@ sealed interface ScheduleUiState {
 }
 
 sealed interface HomeworkUiState {
-    data class Success(val homework: List<Event>) : HomeworkUiState
+    data class Success(val homework: List<Homework>) : HomeworkUiState
     data object Error : HomeworkUiState
     data object Loading : HomeworkUiState
 }
 
 sealed interface MarksUiState {
-    data class Success(val homework: List<Event>) : MarksUiState
+    data class Success(val homework: List<MarkData>) : MarksUiState
     data object Error : MarksUiState
     data object Loading : MarksUiState
 }
@@ -53,7 +59,6 @@ class DnevnikViewModel(
 
     var authUiState: AuthUiState by mutableStateOf(AuthUiState.Unauthenticated)
 
-    /** The mutable State that stores the status of the most recent request */
     var scheduleUiState: ScheduleUiState by mutableStateOf(ScheduleUiState.Loading)
         private set
 
@@ -63,10 +68,18 @@ class DnevnikViewModel(
     var marksUiState: MarksUiState by mutableStateOf(MarksUiState.Loading)
         private set
 
-    private val date: Date = Date() //SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse("2025-02-14")!!
+    var date: Calendar by mutableStateOf(Calendar.getInstance())
+        private set
 
     var selectedEvent: Event? by mutableStateOf(null)
         private set
+
+    private val cache: MutableMap<Calendar, DnevnikData> = hashMapOf()
+
+    fun date(date: Calendar) {
+        this.date = date.clone() as Calendar
+        this.refreshData(silent = true)
+    }
 
     fun selectedEvent(event: Event) {
         selectedEvent = event
@@ -103,44 +116,66 @@ class DnevnikViewModel(
         }
     }
 
-    fun refreshData(refreshProfile: Boolean = false) {
+    private fun setEvents(date: Calendar, data: DnevnikData) {
+        if (!this.date.same(date))
+            return
+
+        cache[date] = data
+
+        data.events.forEach {
+            Log.d("Dnevnik", it.toString())
+        }
+
+        scheduleUiState = ScheduleUiState.Success(data.events)
+        homeworkUiState = HomeworkUiState.Success(data.homework)
+        marksUiState = MarksUiState.Success(data.marks)
+    }
+
+    private fun setEvents(date: Calendar, events: List<Event>) {
+        val homework = HomeworkData.from(events)
+        val marks = MarkData.from(events)
+
+        setEvents(date, DnevnikData(events, homework, marks))
+    }
+
+    private fun restoreFromCache(date: Calendar): Boolean {
+        val events = cache[date]
+
+        if (events != null)
+            this.setEvents(date, events)
+
+        return events != null
+    }
+
+    fun refreshData(silent: Boolean = false, refreshProfile: Boolean = false) {
         viewModelScope.launch {
-            scheduleUiState = ScheduleUiState.Loading
-            homeworkUiState = HomeworkUiState.Loading
-            marksUiState = MarksUiState.Loading
+            val date = date
+            val hasCache = restoreFromCache(date)
+
+            if (!silent || !hasCache) {
+                scheduleUiState = ScheduleUiState.Loading
+                homeworkUiState = HomeworkUiState.Loading
+                marksUiState = MarksUiState.Loading
+            }
 
             try {
-                if (profile == null || refreshProfile) {
+                if (profile == null || refreshProfile)
                     updateProfile()
 
-                    if (profile == null)
-                        throw IllegalArgumentException("Profile can't be null!")
-                }
+                if (profile == null)
+                    updateProfile()
 
-                println("Profile: $profile")
+                if (profile == null)
+                    throw IllegalArgumentException("Profile can't be null!")
 
-                val allEvents = dnevnikRepository.getEvents(profile!!, date, expandFields = "homework,marks")
+                Log.d("Dnevnik", "Profile: $profile")
 
-                allEvents.response.forEach {
-                    println(it)
-                }
-
-                scheduleUiState = ScheduleUiState.Success(
-                    allEvents.response
+                val allEvents = dnevnikRepository.getEvents(
+                    profile!!, date.formatToMes(),
+                    expandFields = "homework,marks"
                 )
 
-                homeworkUiState = HomeworkUiState.Success(
-                    allEvents.response.filter {
-                        it.homework != null && !it.homework.isEmpty()
-                    }
-                )
-
-                marksUiState = MarksUiState.Success(
-                    allEvents.response.filter {
-                        !it.marks.isNullOrEmpty()
-                    }
-                )
-
+                setEvents(date, allEvents.response)
                 return@launch
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -150,9 +185,11 @@ class DnevnikViewModel(
                 e.printStackTrace()
             }
 
-            scheduleUiState = ScheduleUiState.Error
-            homeworkUiState = HomeworkUiState.Error
-            marksUiState = MarksUiState.Error
+            if (!hasCache) {
+                scheduleUiState = ScheduleUiState.Error
+                homeworkUiState = HomeworkUiState.Error
+                marksUiState = MarksUiState.Error
+            }
         }
     }
 

@@ -23,7 +23,7 @@ data class Event(
 //    @SerialName("building_name")
 //    val buildingName: String?,
     @SerialName("cancelled")
-    val cancelled: Boolean?,
+    val cancelled: Boolean = false,
     //@SerialName("city_building_name")
     //val cityBuildingName: Any?,
 //    @SerialName("class_unit_ids")
@@ -67,7 +67,7 @@ data class Event(
 //    @SerialName("health_status")
 //    val healthStatus: Any?,
     @SerialName("homework")
-    val homework: EventHomework?,
+    val homework: EventHomework? = null,
     @SerialName("id")
     val id: Long,
 //    @SerialName("is_all_day")
@@ -84,12 +84,12 @@ data class Event(
 //    val lessonName: String?,
 //    @SerialName("lesson_theme")
 //    val lessonTheme: String?,
-    @SerialName("lesson_type")
-    val lessonType: String?,
+//    @SerialName("lesson_type")
+//    val lessonType: String? = "NORMAL",
 //    @SerialName("link_to_join")
 //    val linkToJoin: Any?,
     @SerialName("marks")
-    val marks: List<Mark>?,
+    val marks: List<Mark>? = null,
 //    @SerialName("materials")
 //    val materials: List<Material>?,
 //    @SerialName("need_document")
@@ -113,7 +113,7 @@ data class Event(
 //    @SerialName("registration_start_at")
 //    val registrationStartAt: Any?,
     @SerialName("replaced")
-    val replaced: Boolean?,
+    val replaced: Boolean? = false,
 //    @SerialName("replaced_teacher_id")
 //    val replacedTeacherId: Long?,
     @SerialName("room_name")
@@ -129,7 +129,7 @@ data class Event(
 //    @SerialName("student_count")
 //    val studentCount: Any?,
     @SerialName("subject_id")
-    val subjectId: Long?,
+    val subjectId: Int = -1,
     @SerialName("subject_name")
     val subjectName: String,
 //    @SerialName("title")
@@ -147,6 +147,8 @@ data class Event(
 ) {
 
     fun room() = "каб. №$roomNumber"
+
+    fun hasHomework(): Boolean = homework != null && !homework.isEmpty()
 }
 
 fun createDummyEvent(id: Long, finishAt: String, source: String,
@@ -161,7 +163,7 @@ fun createDummyEvent(id: Long, finishAt: String, source: String,
 //        authorName = null,
 //        buildingId = null,
 //        buildingName = null,
-        cancelled = null,
+//        cancelled = null,
 //        cityBuildingName = null,
 //        classUnitIds = null,
 //        classUnitName = null,
@@ -192,7 +194,7 @@ fun createDummyEvent(id: Long, finishAt: String, source: String,
 //        lessonEducationType = null,
 //        lessonName = null,
 //        lessonTheme = null,
-        lessonType = null,
+//        lessonType = null,
 //        linkToJoin = null,
         marks = null,
 //        materials = null,
@@ -214,8 +216,8 @@ fun createDummyEvent(id: Long, finishAt: String, source: String,
         sourceId = null,
         startAt = startAt,
 //        studentCount = null,
-        subjectId = null,
-        subjectName = "Lorem Ipsum",
+        subjectId = -1,
+        subjectName = "Lorem Ipsum Dolor sit amet Lorem Ipsum",
 //        title = title,
 //        type = null,
 //        types = null,

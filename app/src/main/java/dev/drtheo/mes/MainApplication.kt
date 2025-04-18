@@ -4,10 +4,9 @@ import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.drtheo.mes.data.AppContainer
 import dev.drtheo.mes.data.DefaultAppContainer
-import dev.drtheo.mes.ui.screens.DnevnikViewModel
+import dev.drtheo.mes.ui.DnevnikViewModel
 
 interface ExceptionListener {
     fun uncaughtException(thread: Thread, throwable: Throwable)

@@ -12,7 +12,6 @@ interface DnevnikApiService {
 
     @GET("api/eventcalendar/v1/api/events")
     suspend fun getEvents(
-        //@Header("Authorization") authHeader: String,
         @Header("X-Mes-Subsystem") mesSubsystem: String = "familymp",
         @Header("X-Mes-Role") mesRole: String = "student",
         @Header("Client-Type") clientType: String = "diary-mobile",

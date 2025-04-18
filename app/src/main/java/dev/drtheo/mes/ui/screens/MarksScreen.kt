@@ -1,8 +1,9 @@
 package dev.drtheo.mes.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -31,19 +34,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.drtheo.mes.ErrorScreen
 import dev.drtheo.mes.LoadingScreen
+import dev.drtheo.mes.R
 import dev.drtheo.mes.model.Mark
 import dev.drtheo.mes.model.createDummyMark
-import dev.drtheo.mes.model.event.Event
+import dev.drtheo.mes.model.wrapped.MarkData
+import dev.drtheo.mes.ui.DnevnikViewModel
+import dev.drtheo.mes.ui.MarksUiState
 
 @Composable
 fun BuildMarksScreen(
     dnevnikViewModel: DnevnikViewModel,
-    contentPadding: PaddingValues
 ) {
     MarksScreen(
         marksUiState = dnevnikViewModel.marksUiState,
         retryAction = dnevnikViewModel::refreshData,
-        contentPadding = contentPadding
     )
 }
 
@@ -53,7 +57,6 @@ fun MarksScreen(
     marksUiState: MarksUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val isRefreshing by remember { mutableStateOf(false) }
 
@@ -66,7 +69,6 @@ fun MarksScreen(
             is MarksUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
             is MarksUiState.Success -> MarkList(
                 marksUiState.homework,
-                contentPadding = contentPadding,
                 modifier = modifier.fillMaxWidth()
             )
             is MarksUiState.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
@@ -76,23 +78,35 @@ fun MarksScreen(
 
 @Composable
 fun MarkList(
-    events: List<Event>,
+    events: List<MarkData>,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    LazyColumn(
-        modifier = modifier.padding(horizontal = 4.dp),
-        contentPadding = contentPadding
-    ) {
-        items(events) { item ->
-            item.marks!!.forEach {
-                Mark(item.subjectName, it)
+    if (events.isEmpty()) {
+        Column (
+            modifier = modifier,
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                modifier = modifier.size(64.dp),
+                painter = painterResource(R.drawable.ic_marks_outline),
+                contentDescription = stringResource(R.string.no_marks)
+            )
+
+            Text(text = stringResource(R.string.no_marks), modifier = Modifier.padding(16.dp))
+        }
+    } else {
+        LazyColumn(
+            modifier = modifier.padding(horizontal = 4.dp),
+        ) {
+            items(events) { item ->
+                item.marks.forEach {
+                    Mark(item.subjectName, it)
+                }
             }
         }
     }
 }
-
-const val NO_COMMENT = "Нет комментария."
 
 @Composable
 fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
@@ -149,11 +163,11 @@ fun Mark(title: String, mark: Mark, modifier: Modifier = Modifier) {
             )
 
             val hasComment = mark.comment != null
-            val comment = if (hasComment) mark.comment!! else NO_COMMENT
+            val comment = if (hasComment) mark.comment!! else stringResource(R.string.no_comment)
 
             Text(
                 text = comment,
-                fontStyle = if (hasComment) FontStyle.Italic else FontStyle.Normal
+                fontStyle = if (hasComment) FontStyle.Normal else FontStyle.Italic
             )
         }
     }

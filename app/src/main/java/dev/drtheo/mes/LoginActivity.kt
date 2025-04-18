@@ -3,6 +3,7 @@ package dev.drtheo.mes
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Column
@@ -11,16 +12,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import dev.drtheo.mes.ui.screens.DnevnikViewModel
+import dev.drtheo.mes.ui.DnevnikViewModel
 
 @Composable
 fun LoginActivity(dnevnikViewModel: DnevnikViewModel) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.Red
     ) {
         MyWebViewScreen(dnevnikViewModel)
     }
@@ -35,14 +34,14 @@ fun WebViewWithUrlListener(
     val webView = remember {
         WebView(context).apply {
             CookieManager.getInstance().removeAllCookies { }
+
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(
                     view: WebView?,
                     request: WebResourceRequest?
                 ): WebResourceResponse? {
-                    if (request != null && request.url.toString() == "https://school.mos.ru/v1/oauth/userinfo") {
+                    if (request != null && (request.url.toString() == "https://school.mos.ru/v1/oauth/userinfo" || request.url.toString() == "https://school.mos.ru/v3/userinfo")) {
                         val bearer = request.requestHeaders.getValue("Authorization")
-
                         onToken(bearer.substring(7))
                     }
 
@@ -52,6 +51,8 @@ fun WebViewWithUrlListener(
 
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
+            settings.cacheMode = WebSettings.LOAD_NO_CACHE
+
             clearCache(true)
         }
     }
@@ -64,9 +65,7 @@ fun WebViewWithUrlListener(
 
 @Composable
 fun MyWebViewScreen(dnevnikViewModel: DnevnikViewModel) {
-    Column(
-//        modifier = Modifier.background(color = Color.Green)
-    ) {
+    Column {
         WebViewWithUrlListener(
             url = "https://school.mos.ru",
             onToken = { dnevnikViewModel.login(it) }

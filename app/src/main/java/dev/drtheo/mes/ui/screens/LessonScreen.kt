@@ -1,8 +1,6 @@
 package dev.drtheo.mes.ui.screens
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,11 +18,9 @@ import dev.drtheo.mes.model.event.createDummyHomework
 @Composable
 fun BuildLessonScreen(
     event: Event,
-    contentPadding: PaddingValues
 ) {
     LessonScreen(
         event = event,
-        contentPadding = contentPadding
     )
 }
 
@@ -33,11 +29,8 @@ fun BuildLessonScreen(
 fun LessonScreen(
     event: Event,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    Column(
-        modifier = modifier.padding(contentPadding),
-    ) {
+    Column(modifier = modifier) {
         Card(
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
 //            modifier = modifier
